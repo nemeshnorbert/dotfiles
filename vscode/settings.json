@@ -1,0 +1,149 @@
+{
+    // BREADCRUMBDS
+    "breadcrumbs.enabled": true,
+
+    // C++
+    "C_Cpp.exclusionPolicy": "checkFilesAndFolders",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.cppStandard": "c++14",
+    "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, ColumnLimit: 100, IndentWidth: 2, PointerAlignment: Left}",
+    "[cpp]": {
+        "editor.tabSize": 2
+    },
+
+    // DATE & TIME
+    "dateTime.showAMPM": true,
+    "dateTime.showMonth": true,
+    "dateTime.showDayOfWeek": true,
+    "dateTime.showDayOfMonth": true,
+    "dateTime.showSeconds": true,
+    "dateTime.padDays": true,
+
+    // DOCKER
+    // "docker.host": "localhost:8899",
+
+    // DIFF EDITOR
+    "diffEditor.ignoreTrimWhitespace": false,
+
+    // EDITOR
+    "editor.occurrencesHighlight": false,
+    "editor.renderIndentGuides": false,
+    "editor.detectIndentation": true,
+    "editor.acceptSuggestionOnEnter": "smart",
+    "editor.cursorStyle": "line",
+    "editor.cursorBlinking": "blink",
+    "editor.folding": true,
+    "editor.minimap.enabled": false,
+    "editor.renderWhitespace": "all",
+    "editor.renderControlCharacters": false,
+    "editor.rulers": [
+        100
+    ],
+    "editor.renderLineHighlight": "gutter",
+
+    // EXTENSIONS
+    "extensions.autoCheckUpdates": true,
+
+    // EXPLORER
+    "explorer.confirmDelete": false,
+    "explorer.sortOrder": "type",
+    "explorer.confirmDragAndDrop": false,
+
+    // FILES
+    "files.exclude": {
+        "**/*.pyc": {
+            "when": "$(basename).py"
+        },
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/node_modules": true,
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/.vscode": true,
+        "**/bazel*": true,
+        "**/core/pycore/__init__.py": true,
+    },
+	"files.watcherExclude": {
+		"**/.git/objects/**": true,
+		"**/.git/subtree-cache/**": true,
+		"**/node_modules/**": true,
+        "**/bazel*": true,
+	},
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+
+    // GITLENS
+    "gitlens.currentLine.scrollable": false,
+
+    // MARKDOWN
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": false,
+        "editor.minimap.enabled": true
+    },
+
+    // PYTHON
+    "python.analysis.logLevel": "Information",
+	"python.linting.pylintEnabled": false,
+    "[python]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": true
+    },
+    // "python.jediEnabled": true,
+
+    // VIM
+    "vim.searchHighlightColor": "#344a74",
+    "vim.hlsearch": true,
+    "vim.debug.loggingLevelForConsole": "debug",
+    "vim.handleKeys": {
+        "<C-d>": false, // Use PgDown instead, enable multi cursor selection in Insert mode
+        "<C-b>": false // Use PgUp instead, this enables explorer toggling
+    },
+
+    // VS ICONS
+    "vsicons.dontShowNewVersionMessage": true,
+
+    // WINDOW
+    "window.zoomLevel": -1,
+    "window.titleBarStyle": "custom",
+
+    // WORKBENCH
+    "workbench.editor.highlightModifiedTabs": true,
+    "workbench.colorCustomizations": {
+        "editor.findMatchHighlightBackground": "#515161",
+        "terminal.ansiWhite": "#abb2bfff",
+        "editorRuler.foreground": "#583c3c",
+        "editorBracketMatch.border": "#0000",
+        "editorBracketMatch.background": "#000000",
+    },
+    "workbench.panel.defaultLocation": "right",
+    "workbench.settings.editor": "json",
+    "workbench.tree.indent": 16,
+    "workbench.iconTheme": "vscode-icons",
+    "workbench.activityBar.visible": true,
+    "workbench.colorTheme": "One Dark Pro",
+
+    // REMOTE DEVELOPMENT
+    "remote.containers.defaultExtensions": [
+    ],
+
+    // SEARCH
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/bazel*": true
+    },
+
+    // TELEMETRY
+    "telemetry.enableTelemetry": false,
+
+    // TERMINAL
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "terminal.integrated.scrollback": 10000,
+    "terminal.integrated.rendererType": "canvas",
+    "C_Cpp.updateChannel": "Insiders",
+}

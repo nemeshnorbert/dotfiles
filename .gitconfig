@@ -1,0 +1,10 @@
+[user]
+    email = nemeshnorbert@gmail.com
+    name = Norbert Nemesh
+
+[merge]
+    conflictstyle = diff3
+    tool = vimdiff
+
+[core]
+    editor = vim

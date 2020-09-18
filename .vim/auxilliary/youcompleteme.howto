@@ -1,0 +1,3 @@
+sudo apt-get install build-essential cmake python-dev
+cd $HOME/.vim/bundle/YouCompleteMe
+./install.py
