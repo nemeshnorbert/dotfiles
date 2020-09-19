@@ -114,14 +114,10 @@ set background=dark
 " set background=light
 
 " make good habit
-" imap  <Up>     <NOP>
-" imap  <Down>   <NOP>
-" imap  <Left>   <NOP>
-" imap  <Right>  <NOP>
-" map   <Up>     <NOP>
-" map   <Down>   <NOP>
-" map   <Left>   <NOP>
-" map   <Right>  <NOP>
+" nnoremap <Left> :echoe "Use h"<CR>
+" nnoremap <Right> :echoe "Use l"<CR>
+" nnoremap <Up> :echoe "Use k"<CR>
+" nnoremap <Down> :echoe "Use j"<CR>
 
 au BufRead,BufNewFile *.launch set filetype=xml
 set autochdir
