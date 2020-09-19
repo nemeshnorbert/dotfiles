@@ -47,6 +47,8 @@ RUN apt-get update && \
     apt-get install -y tldr && \
     # command line calculator
     apt-get install -y bc && \
+    # Console File Manager with VI Key Bindings
+    apt-get install -y ranger && \
     # validate shell scripts on syntax errors
     apt-get install -y shellcheck && \
     # rich set of graph drawing tools

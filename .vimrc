@@ -337,9 +337,6 @@ map! <F12> <C-o><F12>
 map <silent> <S-F12> :set relativenumber!<CR>
 map! <S-F12> <C-o><S-F12>
 
-au VimEnter * silent! !xmodmap -e 'clear Lock' -e 'keycode 0x42 = Escape'
-au VimLeave * silent! !xmodmap -e 'clear Lock' -e 'keycode 0x42 = Caps_Lock'
-
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                       ***  HERE BE PLUGINS  ***                         "
