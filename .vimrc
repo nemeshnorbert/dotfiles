@@ -107,11 +107,15 @@ filetype plugin indent on
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                            General settings                             "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+if filereadable(expand('$HOME/.vim/bundle/vim-colorschemes/README.md'))
+    " Default dark scheme
+    colorscheme Tomorrow-Night  " sets the colorscheme
+    set background=dark
 
-colorscheme Tomorrow-Night  " sets the colorscheme
-set background=dark
-" colorscheme PaperColor " sets the colorscheme
-" set background=light
+    " Default light scheme
+    " colorscheme PaperColor " sets the colorscheme
+    " set background=light
+endif
 
 " make good habit
 " nnoremap <Left> :echoe "Use h"<CR>
@@ -186,7 +190,7 @@ let g:is_posix = 1
 " tries to avoid those annoying "hit enter to continue" messages
 " if it still doesn't help with certain commands, add a second <cr>
 " at the end of the map command
-set shortmess=a
+set shortmess+=T
 " enable mouse
 set mouse=a
 " Switch syntax highlighting on, when the terminal has colors

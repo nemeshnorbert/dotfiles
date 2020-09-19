@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Uncomment for debugging
-# set -o pipefail -eux
+# set -o pipefail -ex
 
-DOTS_ROOT=$(dirname "$0")
+DOTS_ROOT="$(cd "$(dirname "$0")" || exit 1; pwd)"
 
 ############################################# VS CODE ##############################################
 
 VS_CODE_BIN=$(command -v code)
-if [[ -z $VS_CODE_BIN ]]; then
+if [[ -z "$VS_CODE_BIN" ]]; then
     # Installing VSCode. Requires `sudo`
     # Code is taken from https://code.visualstudio.com/docs/setup/linux
     echo "Installing VS Code"
@@ -37,7 +37,7 @@ else
     echo "VS Code is already installed"
 fi
 
-# ############################################# BASH #################################################
+############################################# BASH #################################################
 
 BASHRC="$HOME/.bashrc"
 if [[ ! -L "$BASHRC" ]]; then
@@ -55,12 +55,12 @@ else
     echo "Link $BASH_PROFILE already exists!"
 fi
 
-# ############################################# VIM ##################################################
+############################################# VIM ##################################################
 
 VIM_BIN=$(command -v vim)
 if [[ -z "$VIM_BIN" ]]; then
     echo "Installing vim"
-    # sudo apt-get install -y vim build-essential cmake python-dev
+    sudo apt-get install -y vim build-essential cmake python-dev
     VIMRC="$HOME/.vimrc"
     if [[ ! -L "$VIMRC" ]]; then
         echo "Setting up $VIMRC"
@@ -75,16 +75,18 @@ if [[ -z "$VIM_BIN" ]]; then
     else
         echo "Directory $VIM_DIR already exists"
     fi
-    echo "Installing vim plugins"
-    vim +'PlugInstall --sync' +qa
+    # echo "Installing vim plugins"
+    vim -c 'PluginInstall' -c 'qall'
 
-    echo "Installing YouCompleteme vim plugin"
-    bash "$DOTS_ROOT/.vim/bundle/YouCompleteMe/install.py"
+    # echo "Installing YouCompleteme vim plugin"
+    cd "$DOTS_ROOT/.vim/bundle/YouCompleteMe" || exit 1
+    ./install.py
+    cd - || exit 1
 else
     echo "Vim already installed!"
 fi
 
-# ############################################# GIT ##################################################
+############################################# GIT ##################################################
 
 GITCONFIG="$HOME/.gitconfig"
 if [[ ! -L "$GITCONFIG" ]]; then
@@ -94,7 +96,7 @@ else
     echo "Link $GITCONFIG already exists!"
 fi
 
-# ############################################# TMUX #################################################
+############################################# TMUX #################################################
 
 TMUXCONFIG="$HOME/.tmux.conf"
 if [[ ! -L "$TMUXCONFIG" ]]; then
@@ -104,7 +106,7 @@ else
     echo "Link $TMUXCONFIG already exists!"
 fi
 
-# ########################################### JUPYTER ################################################
+########################################### JUPYTER ################################################
 
 JUPYTER="$HOME/.jupyter"
 if [[ ! -L "$JUPYTER" ]]; then
@@ -114,7 +116,7 @@ else
     echo "Link $JUPYTER already exists"
 fi
 
-# ########################################### DOCKER #################################################
+########################################### DOCKER #################################################
 
 DOCKER_BASH_HISTORY="$HOME/.docker_bash_history"
 if [[ ! -L "$DOCKER_BASH_HISTORY" ]]; then
