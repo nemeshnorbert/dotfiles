@@ -27,6 +27,8 @@ RUN apt-get update && \
     apt-get install -y lsof && \
     # tools for building deb packages (g++, gcc, libc, make, ...)
     apt-get install -y build-essential && \
+    # trace system calls and signals
+    apt-get install -y strace && \
     # gnu debugger
     apt-get install -y gdb && \
     # compiler independent build tool
