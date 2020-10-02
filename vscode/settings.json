@@ -6,9 +6,13 @@
     "C_Cpp.exclusionPolicy": "checkFilesAndFolders",
     "C_Cpp.default.cStandard": "c11",
     "C_Cpp.default.cppStandard": "c++14",
+    "C_Cpp.updateChannel": "Insiders",
     "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, ColumnLimit: 100, IndentWidth: 2, PointerAlignment: Left}",
     "[cpp]": {
         "editor.tabSize": 2
+    },
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
     },
 
     // DATE & TIME
@@ -66,12 +70,12 @@
         "**/bazel*": true,
         "**/core/pycore/__init__.py": true,
     },
-	"files.watcherExclude": {
-		"**/.git/objects/**": true,
-		"**/.git/subtree-cache/**": true,
-		"**/node_modules/**": true,
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
         "**/bazel*": true,
-	},
+    },
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
 
@@ -87,7 +91,7 @@
 
     // PYTHON
     "python.analysis.logLevel": "Information",
-	"python.linting.pylintEnabled": false,
+    "python.linting.pylintEnabled": false,
     "[python]": {
         "editor.tabSize": 4,
         "editor.insertSpaces": true,
@@ -145,5 +149,4 @@
     "terminal.integrated.shell.linux": "/bin/bash",
     "terminal.integrated.scrollback": 10000,
     "terminal.integrated.rendererType": "canvas",
-    "C_Cpp.updateChannel": "Insiders",
 }
