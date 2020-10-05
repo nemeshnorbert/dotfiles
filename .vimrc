@@ -52,7 +52,7 @@ Plugin 'bling/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 
 " YCM
-Plugin 'Valloric/YouCompleteMe'
+" Plugin 'Valloric/YouCompleteMe'
 
 " C++
 Plugin 'a.vim'
