@@ -37,6 +37,10 @@ RUN apt-get update && \
     apt-get install -y vim && \
     # code version control
     apt-get install -y git && \
+    # arbitrary TCP and UDP connections and listens
+    apt-get install -y netcat && \
+    # NET-3 networking toolkit
+    apt-get install -y net-tools && \
     # secure remote host access
     apt-get install -y ssh && \
     # client server interaction via command line
