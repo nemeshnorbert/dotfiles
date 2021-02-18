@@ -51,8 +51,6 @@ RUN apt-get update && \
     apt-get install -y tmux && \
     # how tos on different unix tools
     apt-get install -y tldr && \
-    # command line calculator
-    apt-get install -y bc && \
     # Console File Manager with VI Key Bindings
     apt-get install -y ranger && \
     # validate shell scripts on syntax errors
@@ -73,8 +71,6 @@ RUN apt-get update && \
     apt-get install -y python3-dev && \
     # pyvenv binary for python 3
     apt-get install -y python3-venv && \
-    # build python wheels for python 3
-    apt-get install -y python3-venv && \
     # python virtual environment creator
     apt-get install -y python3-virtualenv && \
     # operations on multidimensional arrays
@@ -91,8 +87,6 @@ RUN apt-get update && \
     apt-get install -y python3-sklearn && \
     # IDE for data scientists. Hope some day we can install it as deb package
     pip3 install jupyterlab && \
-    # Give access to sudo
-    apt-get install -y sudo && \
     # give access for user to working directory
     chown $uid:$gid $home && \
     # Ensure that excessive files are deleted

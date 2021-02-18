@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # saner programming env: these switches turn some bugs into errors
-set -o errexit -o pipefail -o noclobber -o nounset
+set -o pipefail -o noclobber -o nounset
 
 # -allow a command to fail with !’s side effect on errexit
 # -use return value from ${PIPESTATUS[0]}, because ! hosed $?
 ! getopt --test > /dev/null
 if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
-    echo 'I’m sorry, `getopt --test` failed in this environment.'
+    echo "I’m sorry, getopt --test failed in this environment."
     exit 1
 fi
 
@@ -38,11 +38,11 @@ function docker_help() {
     echo "Docker wrapper for primary development docker image"
     echo "Options:"
     echo "  -h, --help      Options description"
-    echo "  -b, --build     Build 'dev' image"
-    echo "  -u, --up        Run 'dev' container (if not exists) and attach to it"
-    echo "  -s, --stop      Stop 'dev' container"
+    echo "  -b, --build     Build '$image_name' image"
+    echo "  -u, --up        Run '$container_name' container (if not exists) and attach to it"
+    echo "  -s, --stop      Stop '$container_name' container"
     echo "  -l, --list      List info on all images and containers"
-    echo "  -d, --destroy   Stop 'dev' container and delete it"
+    echo "  -d, --destroy   Stop '$container_name' container and delete it"
 }
 
 function docker_build() {
@@ -50,7 +50,8 @@ function docker_build() {
 }
 
 function docker_up() {
-    local container_id=$(docker ps --all --filter "name=$container_name" --format {{.ID}})
+    local container_id
+    container_id=$(docker ps --all --filter "name=$container_name" --format "{{.ID}}")
     if [[ -z "$container_id" ]]; then
         docker_create_impl
     fi
@@ -76,7 +77,10 @@ function docker_destroy() {
 ######################### Impl #########################
 
 function docker_build_impl() {
-    local docker_dir=$(dirname $(readlink -f $0))
+    local script_link
+    script_link=$(readlink -f "$0")
+    local docker_dir
+    docker_dir=$(dirname "$script_link")
     docker build \
         --build-arg uid="$uid" \
         --build-arg gid="$gid" \
@@ -84,7 +88,7 @@ function docker_build_impl() {
         --no-cache \
         -t $image_name \
         -f "$docker_dir/Dockerfile" \
-        $docker_dir
+        "$docker_dir"
 }
 
 function docker_create_impl() {
@@ -93,7 +97,6 @@ function docker_create_impl() {
         --tty \
         --user "$uid:$gid" \
         --name $container_name \
-        --hostname "${HOSTNAME} (DOCKER)" \
         --publish 8888:8888 \
         --volume /etc/group:/etc/group:ro \
         --volume /etc/passwd:/etc/passwd:ro \
