@@ -154,3 +154,5 @@ function before_command_execution() {
 # Set `before_command_execution` as handler for DEBUG bash signal
 trap 'before_command_execution' DEBUG
 
+# Turn off annoying terminal sound
+bind 'set bell-style none'
