@@ -4,13 +4,12 @@
 
     // C++
     "C_Cpp.exclusionPolicy": "checkFilesAndFolders",
-    "C_Cpp.default.cStandard": "c11",
-    "C_Cpp.default.cppStandard": "c++14",
     "C_Cpp.updateChannel": "Insiders",
-    "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, ColumnLimit: 100, IndentWidth: 2, PointerAlignment: Left}",
     "[cpp]": {
         "editor.tabSize": 2
     },
+
+    // HTML
     "[html]": {
         "editor.defaultFormatter": "vscode.html-language-features"
     },
@@ -68,7 +67,6 @@
         "**/.DS_Store": true,
         "**/.vscode": true,
         "**/bazel*": true,
-        "**/core/pycore/__init__.py": true,
     },
     "files.watcherExclude": {
         "**/.git/objects/**": true,
@@ -78,6 +76,9 @@
     },
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
+
+    // GIT
+    "git.enabled": false,
 
     // GITLENS
     "gitlens.currentLine.scrollable": false,
@@ -102,6 +103,7 @@
     // VIM
     "vim.searchHighlightColor": "#344a74",
     "vim.hlsearch": true,
+    "vim.whichwrap": "h,l,<,>,[,]",
     "vim.debug.loggingLevelForConsole": "debug",
     "vim.handleKeys": {
         "<C-d>": false, // Use PgDown instead, enable multi cursor selection in Insert mode
@@ -110,20 +112,10 @@
 
     // VS ICONS
     "vsicons.dontShowNewVersionMessage": true,
-
-    // WINDOW
-    "window.zoomLevel": -1,
     "window.titleBarStyle": "custom",
 
     // WORKBENCH
     "workbench.editor.highlightModifiedTabs": true,
-    "workbench.colorCustomizations": {
-        "editor.findMatchHighlightBackground": "#515161",
-        "terminal.ansiWhite": "#abb2bfff",
-        "editorRuler.foreground": "#583c3c",
-        "editorBracketMatch.border": "#0000",
-        "editorBracketMatch.background": "#000000",
-    },
     "workbench.panel.defaultLocation": "right",
     "workbench.settings.editor": "json",
     "workbench.tree.indent": 16,
@@ -133,6 +125,24 @@
 
     // REMOTE DEVELOPMENT
     "remote.containers.defaultExtensions": [
+        "aaron-bond.better-comments",
+        "akamud.vscode-theme-onelight",
+        "BazelBuild.vscode-bazel",
+        "CoenraadS.bracket-pair-colorizer",
+        "eamodio.gitlens",
+        "file-icons.file-icons",
+        "KevinRose.vsc-python-indent",
+        "mhutchie.git-graph",
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "ms-vscode.cpptools",
+        "mutantdino.resourcemonitor",
+        "njpwerner.autodocstring",
+        "rid9.datetime",
+        "vscode-icons-team.vscode-icons",
+        "vscodevim.vim",
+        "zhuangtongfa.material-theme",
     ],
 
     // SEARCH
@@ -149,4 +159,10 @@
     "terminal.integrated.shell.linux": "/bin/bash",
     "terminal.integrated.scrollback": 10000,
     "terminal.integrated.rendererType": "canvas",
+    "workbench.editorAssociations": [
+        {
+            "viewType": "jupyter.notebook.ipynb",
+            "filenamePattern": "*.ipynb"
+        }
+    ],
 }
