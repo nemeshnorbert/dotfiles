@@ -77,9 +77,6 @@
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
 
-    // GIT
-    "git.enabled": false,
-
     // GITLENS
     "gitlens.currentLine.scrollable": false,
 
