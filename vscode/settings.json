@@ -103,8 +103,9 @@
     "vim.whichwrap": "h,l,<,>,[,]",
     "vim.debug.loggingLevelForConsole": "debug",
     "vim.handleKeys": {
-        "<C-d>": false, // Use PgDown instead, enable multi cursor selection in Insert mode
-        "<C-b>": false // Use PgUp instead, this enables explorer toggling
+        "<C-d>": true, // if false enables multi cursor selection in Insert mode, then use PageDown instead
+        "<C-u>": true, // if false enables cursor undo action in Insert mode, then use PageDown instead
+        "<C-b>": false // if  false enables explorer toggling, use PageUp instead
     },
 
     // VS ICONS
