@@ -133,6 +133,8 @@ shopt -s checkjobs
 shopt -s checkwinsize
 # Expand environment variable on TAB press
 shopt -s direxpand
+# Enable Bash Extended Globbing expressions
+shopt -s extglob
 # Supercharge your globbing experience
 shopt -s globstar
 # Append to the history file, don't overwrite it
@@ -245,14 +247,29 @@ export LANG=en_US.UTF-8
 #
 ###############################################################################
 
-__posh_color () {
-    if [ -n "$ZSH_VERSION" ]; then
-        echo %{$1%}
-    elif [ -n "$BASH_VERSION" ]; then
-        echo \\[$1\\]
+function __posh_color {
+    echo \\[$1\\]
+}
+
+# Returns the location of the .git/ directory.
+function __posh_gitdir {
+    # Note: this function is duplicated in git-completion.bash
+    # When updating it, make sure you update the other one to match.
+    if [ -z "${1-}" ]; then
+        if [ -n "${__posh_git_dir-}" ]; then
+            echo "$__posh_git_dir"
+        elif [ -n "${GIT_DIR-}" ]; then
+            test -d "${GIT_DIR-}" || return 1
+            echo "$GIT_DIR"
+        elif [ -d .git ]; then
+            echo .git
+        else
+            git rev-parse --git-dir 2>/dev/null
+        fi
+    elif [ -d "$1/.git" ]; then
+        echo "$1/.git"
     else
-        # assume Bash anyway
-        echo \\[$1\\]
+        echo "$1"
     fi
 }
 
@@ -269,77 +286,92 @@ __posh_git_echo () {
     local BrightYellow='\033[0;93m'
     local BrightCyan='\033[0;96m'
 
-    local DefaultForegroundColor=$(__posh_color '\e[m') # Default no color
+    local DefaultForegroundColor
+    DefaultForegroundColor=$(__posh_color '\e[m') # Default no color
     local DefaultBackgroundColor=
 
     local BeforeText='['
-    local BeforeForegroundColor=$(__posh_color $BrightYellow) # Yellow
+    local BeforeForegroundColor
+    BeforeForegroundColor=$(__posh_color "$BrightYellow") # Yellow
     local BeforeBackgroundColor=
     local DelimText=' |'
-    local DelimForegroundColor=$(__posh_color $BrightYellow) # Yellow
+    local DelimForegroundColor
+    DelimForegroundColor=$(__posh_color "$BrightYellow") # Yellow
     local DelimBackgroundColor=
 
     local AfterText=']'
-    local AfterForegroundColor=$(__posh_color $BrightYellow) # Yellow
+    local AfterForegroundColor
+    AfterForegroundColor=$(__posh_color "$BrightYellow") # Yellow
     local AfterBackgroundColor=
 
-    local BranchForegroundColor=$(__posh_color $BrightCyan)  # Cyan
+    local BranchForegroundColor
+    BranchForegroundColor=$(__posh_color "$BrightCyan")  # Cyan
     local BranchBackgroundColor=
-    local BranchAheadForegroundColor=$(__posh_color $BrightGreen) # Green
+    local BranchAheadForegroundColor
+    BranchAheadForegroundColor=$(__posh_color "$BrightGreen") # Green
     local BranchAheadBackgroundColor=
-    local BranchBehindForegroundColor=$(__posh_color $BrightRed) # Red
+    local BranchBehindForegroundColor
+    BranchBehindForegroundColor=$(__posh_color "$BrightRed") # Red
     local BranchBehindBackgroundColor=
-    local BranchBehindAndAheadForegroundColor=$(__posh_color $BrightYellow) # Yellow
+    local BranchBehindAndAheadForegroundColor
+    BranchBehindAndAheadForegroundColor=$(__posh_color "$BrightYellow") # Yellow
     local BranchBehindAndAheadBackgroundColor=
 
-    local BeforeIndexText=''
-    local BeforeIndexForegroundColor=$(__posh_color $Green) # Dark green
-    local BeforeIndexBackgroundColor=
-
-    local IndexForegroundColor=$(__posh_color $Green) # Dark green
+    local IndexForegroundColor
+    IndexForegroundColor=$(__posh_color "$Green") # Dark green
     local IndexBackgroundColor=
 
-    local WorkingForegroundColor=$(__posh_color $Red) # Dark red
+    local WorkingForegroundColor
+    WorkingForegroundColor=$(__posh_color "$Red") # Dark red
     local WorkingBackgroundColor=
 
-    local StashForegroundColor=$(__posh_color $BrightRed) # Red
+    local StashForegroundColor
+    StashForegroundColor=$(__posh_color "$BrightRed") # Red
     local StashBackgroundColor=
     local BeforeStash='('
     local AfterStash=')'
 
     local LocalDefaultStatusSymbol=''
     local LocalWorkingStatusSymbol=' !'
-    local LocalWorkingStatusColor=$(__posh_color "$Red")
+    local LocalWorkingStatusColor
+    LocalWorkingStatusColor=$(__posh_color "$Red")
     local LocalStagedStatusSymbol=' ~'
-    local LocalStagedStatusColor=$(__posh_color "$BrightCyan")
+    local LocalStagedStatusColor
+    LocalStagedStatusColor=$(__posh_color "$BrightCyan")
 
-    local RebaseForegroundColor=$(__posh_color '\e[0m') # reset
+    local RebaseForegroundColor
+    RebaseForegroundColor=$(__posh_color '\e[0m') # reset
     local RebaseBackgroundColor=
 
-    local BranchBehindAndAheadDisplay=`git config --get bash.branchBehindAndAheadDisplay`
+    local BranchBehindAndAheadDisplay
+    BranchBehindAndAheadDisplay=$(git config --get bash.branchBehindAndAheadDisplay)
     if [ -z "$BranchBehindAndAheadDisplay" ]; then
         BranchBehindAndAheadDisplay="full"
     fi
 
-    local EnableFileStatus=`git config --bool bash.enableFileStatus`
+    local EnableFileStatus
+    EnableFileStatus=$(git config --bool bash.enableFileStatus)
     case "$EnableFileStatus" in
         true)  EnableFileStatus=true ;;
         false) EnableFileStatus=false ;;
         *)     EnableFileStatus=true ;;
     esac
-    local ShowStatusWhenZero=`git config --bool bash.showStatusWhenZero`
+    local ShowStatusWhenZero
+    ShowStatusWhenZero=$(git config --bool bash.showStatusWhenZero)
     case "$ShowStatusWhenZero" in
         true)  ShowStatusWhenZero=true ;;
         false) ShowStatusWhenZero=false ;;
         *)     ShowStatusWhenZero=false ;;
     esac
-    local EnableStashStatus=`git config --bool bash.enableStashStatus`
+    local EnableStashStatus
+    EnableStashStatus=$(git config --bool bash.enableStashStatus)
     case "$EnableStashStatus" in
         true)  EnableStashStatus=true ;;
         false) EnableStashStatus=false ;;
         *)     EnableStashStatus=true ;;
     esac
-    local EnableStatusSymbol=`git config --bool bash.enableStatusSymbol`
+    local EnableStatusSymbol
+    EnableStatusSymbol=$(git config --bool bash.enableStatusSymbol)
     case "$EnableStatusSymbol" in
         true)  EnableStatusSymbol=true ;;
         false) EnableStatusSymbol=false ;;
@@ -363,9 +395,8 @@ __posh_git_echo () {
     __POSH_BRANCH_AHEAD_BY=0
     __POSH_BRANCH_BEHIND_BY=0
 
-    local is_detached=false
-
-    local g=$(__posh_gitdir)
+    local g
+    g=$(__posh_gitdir "$@")
     if [ -z "$g" ]; then
         return # not a git directory
     fi
@@ -404,20 +435,22 @@ __posh_git_echo () {
         fi
 
         b=$(git symbolic-ref HEAD 2>/dev/null) || {
-            is_detached=true
-            local output=$(git config -z --get bash.describeStyle)
+            local output
+            output=$(git config -z --get bash.describeStyle)
             if [ -n "$output" ]; then
                 GIT_PS1_DESCRIBESTYLE=$output
             fi
             b=$(
             case "${GIT_PS1_DESCRIBESTYLE-}" in
-            (contains)
+            contains )
                 git describe --contains HEAD ;;
-            (branch)
+            branch )
                 git describe --contains --all HEAD ;;
-            (describe)
+            describe )
                 git describe HEAD ;;
-            (* | default)
+            default )
+                git describe --tags --exact-match HEAD ;;
+            * )
                 git describe --tags --exact-match HEAD ;;
             esac 2>/dev/null) ||
 
@@ -462,7 +495,7 @@ __posh_git_echo () {
         local filesModified=0
         local filesDeleted=0
         local filesUnmerged=0
-        while IFS="\n" read -r tag rest
+        while IFS=$'\n' read -r tag rest
         do
             case "${tag:0:1}" in
                 A )
@@ -507,7 +540,7 @@ __posh_git_echo () {
                     (( filesUnmerged++ ))
                     ;;
             esac
-        done <<< "`git status --porcelain 2>/dev/null`"
+        done <<< "$(git status --porcelain 2>/dev/null)"
     fi
 
     local gitstring=
@@ -517,7 +550,7 @@ __posh_git_echo () {
     gitstring="$BeforeBackgroundColor$BeforeForegroundColor$BeforeText"
 
     # branch
-    if (( $__POSH_BRANCH_BEHIND_BY > 0 && $__POSH_BRANCH_AHEAD_BY > 0 )); then
+    if (( __POSH_BRANCH_BEHIND_BY > 0 && __POSH_BRANCH_AHEAD_BY > 0 )); then
         gitstring+="$BranchBehindAndAheadBackgroundColor$BranchBehindAndAheadForegroundColor$branchstring"
         if [ "$BranchBehindAndAheadDisplay" = "full" ]; then
             gitstring+="$BranchBehindStatusSymbol$__POSH_BRANCH_BEHIND_BY$BranchAheadStatusSymbol$__POSH_BRANCH_AHEAD_BY"
@@ -526,21 +559,21 @@ __posh_git_echo () {
         else
             gitstring+=" $BranchBehindAndAheadStatusSymbol"
         fi
-    elif (( $__POSH_BRANCH_BEHIND_BY > 0 )); then
+    elif (( __POSH_BRANCH_BEHIND_BY > 0 )); then
         gitstring+="$BranchBehindBackgroundColor$BranchBehindForegroundColor$branchstring"
-        if [ "$BranchBehindAndAheadDisplay" = "full" -o "$BranchBehindAndAheadDisplay" = "compact" ]; then
+        if [ "$BranchBehindAndAheadDisplay" = "full" ] || [ "$BranchBehindAndAheadDisplay" = "compact" ]; then
             gitstring+="$BranchBehindStatusSymbol$__POSH_BRANCH_BEHIND_BY"
         else
             gitstring+="$BranchBehindStatusSymbol"
         fi
-    elif (( $__POSH_BRANCH_AHEAD_BY > 0 )); then
+    elif (( __POSH_BRANCH_AHEAD_BY > 0 )); then
         gitstring+="$BranchAheadBackgroundColor$BranchAheadForegroundColor$branchstring"
-        if [ "$BranchBehindAndAheadDisplay" = "full" -o "$BranchBehindAndAheadDisplay" = "compact" ]; then
+        if [ "$BranchBehindAndAheadDisplay" = "full" ] || [ "$BranchBehindAndAheadDisplay" = "compact" ]; then
             gitstring+="$BranchAheadStatusSymbol$__POSH_BRANCH_AHEAD_BY"
         else
             gitstring+="$BranchAheadStatusSymbol"
         fi
-    elif (( $divergence_return_code )); then
+    elif (( divergence_return_code )); then
         # ahead and behind are both 0, but there was some problem while executing the command.
         gitstring+="$BranchBackgroundColor$BranchForegroundColor$branchstring$BranchWarningStatusSymbol"
     else
@@ -552,22 +585,22 @@ __posh_git_echo () {
 
     # index status
     if $EnableFileStatus; then
-        local indexCount="$(( $indexAdded + $indexModified + $indexDeleted + $indexUnmerged ))"
-        local workingCount="$(( $filesAdded + $filesModified + $filesDeleted + $filesUnmerged ))"
+        local indexCount="$(( indexAdded + indexModified + indexDeleted + indexUnmerged ))"
+        local workingCount="$(( filesAdded + filesModified + filesDeleted + filesUnmerged ))"
 
-        if (( $indexCount != 0 )) || $ShowStatusWhenZero; then
+        if (( indexCount != 0 )) || $ShowStatusWhenZero; then
             gitstring+="$IndexBackgroundColor$IndexForegroundColor +$indexAdded ~$indexModified -$indexDeleted"
         fi
-        if (( $indexUnmerged != 0 )); then
+        if (( indexUnmerged != 0 )); then
             gitstring+=" $IndexBackgroundColor$IndexForegroundColor!$indexUnmerged"
         fi
-        if (( $indexCount != 0 && ($workingCount != 0 || $ShowStatusWhenZero) )); then
+        if (( indexCount != 0 && (workingCount != 0 || ShowStatusWhenZero) )); then
             gitstring+="$DelimBackgroundColor$DelimForegroundColor$DelimText"
         fi
-        if (( $workingCount != 0 )) || $ShowStatusWhenZero; then
+        if (( workingCount != 0 )) || $ShowStatusWhenZero; then
             gitstring+="$WorkingBackgroundColor$WorkingForegroundColor +$filesAdded ~$filesModified -$filesDeleted"
         fi
-        if (( $filesUnmerged != 0 )); then
+        if (( filesUnmerged != 0 )); then
             gitstring+=" $WorkingBackgroundColor$WorkingForegroundColor!$filesUnmerged"
         fi
 
@@ -594,29 +627,6 @@ __posh_git_echo () {
     echo "$gitstring"
 }
 
-# Returns the location of the .git/ directory.
-__posh_gitdir ()
-{
-    # Note: this function is duplicated in git-completion.bash
-    # When updating it, make sure you update the other one to match.
-    if [ -z "${1-}" ]; then
-        if [ -n "${__posh_git_dir-}" ]; then
-            echo "$__posh_git_dir"
-        elif [ -n "${GIT_DIR-}" ]; then
-            test -d "${GIT_DIR-}" || return 1
-            echo "$GIT_DIR"
-        elif [ -d .git ]; then
-            echo .git
-        else
-            git rev-parse --git-dir 2>/dev/null
-        fi
-    elif [ -d "$1/.git" ]; then
-        echo "$1/.git"
-    else
-        echo "$1"
-    fi
-}
-
 # Updates the global variables `__POSH_BRANCH_AHEAD_BY` and `__POSH_BRANCH_BEHIND_BY`.
 __posh_git_ps1_upstream_divergence ()
 {
@@ -627,7 +637,8 @@ __posh_git_ps1_upstream_divergence ()
 
     svn_remote=()
     # get some config options from git-config
-    local output="$(git config -z --get-regexp '^(svn-remote\..*\.url|bash\.showUpstream)$' 2>/dev/null | tr '\0\n' '\n ')"
+    local output
+    output="$(git config -z --get-regexp '^(svn-remote\..*\.url|bash\.showUpstream)$' 2>/dev/null | tr '\0\n' '\n ')"
     while read -r key value; do
         case "$key" in
         bash.showUpstream)
@@ -658,10 +669,12 @@ __posh_git_ps1_upstream_divergence ()
     svn*)
         # get the upstream from the "git-svn-id: ..." in a commit message
         # (git-svn uses essentially the same procedure internally)
-        local svn_upstream=($(git log --first-parent -1 \
-                    --grep="^git-svn-id: \(${svn_url_pattern#??}\)" 2>/dev/null))
+        local svn_upstreams=()
+        while IFS='' read -r line; do
+            svn_upstreams+=("$line");
+        done < <(git log --first-parent -1 --grep="^git-svn-id: \(${svn_url_pattern#??}\)" 2>/dev/null)
         if (( 0 != ${#svn_upstream[@]} )); then
-            svn_upstream=${svn_upstream[ ${#svn_upstream[@]} - 2 ]}
+            svn_upstream=${svn_upstreams[ ${#svn_upstreams[@]} - 2 ]}
             svn_upstream=${svn_upstream%@*}
             local n_stop="${#svn_remote[@]}"
             local n
@@ -689,7 +702,7 @@ __posh_git_ps1_upstream_divergence ()
         local output=
         output=$(git rev-list --count --left-right $upstream...HEAD 2>/dev/null)
         return_code=$?
-        IFS=$' \t\n' read -r __POSH_BRANCH_BEHIND_BY __POSH_BRANCH_AHEAD_BY <<< $output
+        IFS=$' \t\n' read -r __POSH_BRANCH_BEHIND_BY __POSH_BRANCH_AHEAD_BY <<< "$output"
     else
         local output
         output=$(git rev-list --left-right $upstream...HEAD 2>/dev/null)
@@ -700,7 +713,7 @@ __posh_git_ps1_upstream_divergence ()
             "<*") (( __POSH_BRANCH_BEHIND_BY++ )) ;;
             ">*") (( __POSH_BRANCH_AHEAD_BY++ ))  ;;
             esac
-        done <<< $output
+        done <<< "$output"
     fi
     : ${__POSH_BRANCH_AHEAD_BY:=0}
     : ${__POSH_BRANCH_BEHIND_BY:=0}
@@ -739,40 +752,57 @@ function __prompt_command_stop {
 
 function __prompt_command {
     LastCommand=$? # Must come first!
-    Blue='\[\e[01;34m\]'
-    White='\[\e[01;37m\]'
-    Red='\[\e[01;31m\]'
-    Green='\[\e[01;32m\]'
+    BoldBlue='\[\e[01;34m\]'
+    BoldWhite='\[\e[01;37m\]'
+    BoldRed='\[\e[01;31m\]'
+    BoldGreen='\[\e[01;32m\]'
+    FaintGreen='\[\e[02;32m\]'
     Reset='\[\e[00m\]'
     FancyX='\342\234\227'
     Checkmark='\342\234\223'
     Newline='\n'
 
+    # If root, just print the host in red. Otherwise, print the current user
+    # and host in green.
+    local PS1LOC
+    PS1LOC=""
+    if [[ $EUID == 0 ]]; then
+        PS1LOC+="$BoldRed\\u$BoldGreen@\\h "
+    else
+        PS1LOC+="$BoldGreen\\u@\\h "
+    fi
+    PS1LOC+="$Reset"
+
+    # Print the working directory and prompt marker in blue, and reset
+    # the text color to the default.
+    local gitstring
+    gitstring=$(__posh_git_echo "$@")
+    local PS1GIT="$BoldBlue\\w $gitstring$Reset "
+
     # Add a bright white exit status for the last command
-    PS1="$White\$? "
+    local PS1STATUS="$BoldWhite\$? "
     # If it was successful, print a green check mark. Otherwise, print
     # a red X.
     if [[ $LastCommand == 0 ]]; then
-        PS1+="$Green$Checkmark "
+        PS1STATUS+="$FaintGreen$Checkmark "
     else
-        PS1+="$Red$FancyX "
+        PS1STATUS+="$BoldRed$FancyX "
     fi
 
     # Add the ellapsed time and current date
     __prompt_command_stop
-    PS1+="($timer_show) \t "
+    local PS1TIME
+    PS1TIME+="($timer_show) \t $Reset"
 
-    # If root, just print the host in red. Otherwise, print the current user
-    # and host in green.
-    if [[ $EUID == 0 ]]; then
-        PS1+="$Red\\u$Green@\\h "
+    # Add symbol
+    local PS1SYMBOL="$Newline"
+    if [[ $LastCommand == 0 ]]; then
+        PS1SYMBOL+="$BoldGreen\\\$ "
     else
-        PS1+="$Green\\u@\\h "
+        PS1SYMBOL+="$BoldRed\\\$ "
     fi
-    # Print the working directory and prompt marker in blue, and reset
-    # the text color to the default.
-    local gitstring=$(__posh_git_echo)
-    PS1+="$Blue\\w $gitstring$Newline\\\$$Reset "
+    PS1SYMBOL+="$Reset "
+    PS1="${PS1LOC}${PS1GIT}${PS1STATUS}${PS1TIME}${PS1SYMBOL}"
 }
 
 trap '__prompt_command_start' DEBUG
