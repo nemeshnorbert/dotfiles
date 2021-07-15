@@ -1,3 +1,4 @@
+#!/bin/bash
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -715,8 +716,8 @@ __posh_git_ps1_upstream_divergence ()
             esac
         done <<< "$output"
     fi
-    : ${__POSH_BRANCH_AHEAD_BY:=0}
-    : ${__POSH_BRANCH_BEHIND_BY:=0}
+    : "${__POSH_BRANCH_AHEAD_BY:=0}"
+    : "${__POSH_BRANCH_BEHIND_BY:=0}"
     return $return_code
 }
 
@@ -738,20 +739,29 @@ function __prompt_command_stop {
     local m=$(((delta_us / 60000000) % 60))
     local h=$((delta_us / 3600000000))
     # Goal: always show around 3 digits of accuracy
-    if ((h > 0)); then timer_show=${h}h${m}m
-    elif ((m > 0)); then timer_show=${m}m${s}s
-    elif ((s >= 10)); then timer_show=${s}.$((ms / 100))s
-    elif ((s > 0)); then timer_show=${s}.$(printf %03d $ms)s
-    elif ((ms >= 100)); then timer_show=${ms}ms
-    elif ((ms > 0)); then timer_show=${ms}.$((us / 100))ms
-    else timer_show=${us}us
+    if ((h > 0)); then
+        timer_show=${h}h${m}m
+    elif ((m > 0)); then
+        timer_show=${m}m${s}s
+    elif ((s >= 10)); then
+        timer_show=${s}.$((ms / 100))s
+    elif ((s > 0)); then
+        timer_show=${s}.$(printf %03d $ms)s
+    elif ((ms >= 100)); then
+        timer_show=${ms}ms
+    elif ((ms > 0)); then
+        timer_show=${ms}.$((us / 100))ms
+    else
+        timer_show=${us}us
     fi
     unset __prompt_command_start
 }
 
 
 function __prompt_command {
-    LastCommand=$? # Must come first!
+    # Must come first!
+    LastCommand=$?
+    BoldYellow='\[\e[01;33m\]'
     BoldBlue='\[\e[01;34m\]'
     BoldWhite='\[\e[01;37m\]'
     BoldRed='\[\e[01;31m\]'
@@ -761,6 +771,14 @@ function __prompt_command {
     FancyX='\342\234\227'
     Checkmark='\342\234\223'
     Newline='\n'
+
+    # Show virtual environment if any
+    PS1VENV=""
+    if [ -n "$VIRTUAL_ENV" ]; then
+        PS1VENV+="$BoldYellow("
+        PS1VENV+=$(basename "$VIRTUAL_ENV")
+        PS1VENV+=")$Reset "
+    fi
 
     # If root, just print the host in red. Otherwise, print the current user
     # and host in green.
@@ -802,7 +820,7 @@ function __prompt_command {
         PS1SYMBOL+="$BoldRed\\\$ "
     fi
     PS1SYMBOL+="$Reset "
-    PS1="${PS1LOC}${PS1GIT}${PS1STATUS}${PS1TIME}${PS1SYMBOL}"
+    PS1="${PS1VENV}${PS1LOC}${PS1GIT}${PS1STATUS}${PS1TIME}${PS1SYMBOL}"
 }
 
 trap '__prompt_command_start' DEBUG
@@ -839,7 +857,7 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 # ls
 #-------------------------------------------------------------
 
-export LSCOLORS=Gxfxcxdxbxegedabagacad
+export LSCOLORS='Gxfxcxdxbxegedabagacad'
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
