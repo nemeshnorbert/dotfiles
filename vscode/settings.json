@@ -50,6 +50,9 @@
     "editor.minimap.showSlider": "always",
     "editor.autoSurround": "languageDefined",
     "editor.stickyTabStops": true,
+    "editor.parameterHints.enabled": true,
+    "editor.inlineSuggest.enabled": true,
+    "editor.suggestSelection": "first",
 
     // EXTENSIONS
     "extensions.autoCheckUpdates": true,
@@ -96,6 +99,7 @@
 	"jupyter.themeMatplotlibPlots": true,
     "jupyter.askForKernelRestart": false,
     "notebook.globalToolbar": false,
+    "notebook.lineNumbers": "on",
 
     // MARKDOWN
     "[markdown]": {
@@ -122,8 +126,6 @@
         "BazelBuild.vscode-bazel",
         "CoenraadS.bracket-pair-colorizer",
         "eamodio.gitlens",
-        "file-icons.file-icons",
-        "KevinRose.vsc-python-indent",
         "mhutchie.git-graph",
         "ms-azuretools.vscode-docker",
         "ms-python.python",
@@ -132,8 +134,9 @@
         "mutantdino.resourcemonitor",
         "njpwerner.autodocstring",
         "rid9.datetime",
-        "TabNine.tabnine-vscode",
-        "vscode-icons-team.vscode-icons",
+        "tamasfe.even-better-toml",
+        "trond-snekvik.simple-rst",
+        "pkief.material-icon-theme",
         "vscodevim.vim",
         "zhuangtongfa.material-theme",
     ],
@@ -168,13 +171,12 @@
         "<C-b>": false // if  false enables explorer toggling, use PageUp instead
     },
 
-    // VS ICONS
-    "vsicons.dontShowNewVersionMessage": true,
+    // ICONS
+    "material-icon-theme.folders.theme": "none",
 
     // WINDOW
     "window.titleBarStyle": "custom",
     "window.menuBarVisibility": "compact",
-    "window.zoomLevel": -1,
 
     // WORKBENCH
     "workbench.colorTheme": "One Dark Pro",
@@ -182,7 +184,7 @@
     "workbench.panel.defaultLocation": "right",
     "workbench.settings.editor": "json",
     "workbench.tree.indent": 16,
-    "workbench.iconTheme": "vscode-icons",
+    "workbench.iconTheme": "material-icon-theme",
     "workbench.activityBar.visible": true,
     "workbench.editorAssociations": {
         "*.ipynb": "jupyter.notebook.ipynb"
@@ -190,5 +192,7 @@
 
     // ZEN MODE
     "zenMode.restore": true,
-    "tabnine.experimentalAutoImports": true
+
+    // WINDOW
+    "window.zoomLevel": -1
 }
