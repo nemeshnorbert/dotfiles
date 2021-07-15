@@ -1,3 +1,4 @@
 .docker/.bash_history
 .vim/bundle
 .vim/.netrwhist
+.jupyter/
