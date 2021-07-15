@@ -2,157 +2,831 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+#-------------------------------------------------------------
 # If not running interactively, don't do anything
+#-------------------------------------------------------------
+
 case $- in
     *i*) ;;
       *) return;;
 esac
 
-# file to store history of commands called
-HISTFILE=$HOME/.bash_history
+#-------------------------------------------------------------
+# Source global definitions (if any)
+#-------------------------------------------------------------
 
-# don't put duplicate lines in the history.
-# See bash(1) for more options
-# ... or force ignoredups and ignorespace
-HISTCONTROL=ignoredups:ignorespace
+if [ -f /etc/bashrc ]; then
+    # shellcheck disable=SC1091
+    . /etc/bashrc        # --> Read /etc/bashrc, if present.
+elif [ -f /etc/bash.bashrc ]; then
+    # shellcheck disable=SC1091
+    . /etc/bash.bashrc   # --> Read /etc/bash.bashrc, if present.
+fi
 
-# append to the history file, don't overwrite it
+#-------------------------------------------------------------
+# Use Bash completion, if installed
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+#-------------------------------------------------------------
+
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    # shellcheck disable=SC1091
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    # shellcheck disable=SC1091
+    . /etc/bash_completion
+  fi
+fi
+# Setting builtins
+
+# Show alterntaives in TAB-completion
+bind 'set show-all-if-ambiguous on'
+# Enable zsh-like TAB completion
+bind 'TAB:menu-complete'
+
+#-------------------------------------------------------------
+# Alias definitions.
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+#-------------------------------------------------------------
+
+if [ -f ~/.bash_aliases ]; then
+    # shellcheck disable=SC1090
+    . ~/.bash_aliases
+fi
+
+#-------------------------------------------------------------
+# Aliases
+#-------------------------------------------------------------
+
+
+#--------------------------------------------------------------
+#  Automatic setting of $DISPLAY (if not set already).
+#  This works for me - your mileage may vary. . . .
+#  The problem is that different types of terminals give
+#+ different answers to 'who am i' (rxvt in particular can be
+#+ troublesome) - however this code seems to work in a majority
+#+ of cases.
+#--------------------------------------------------------------
+
+function get_xserver {
+    case $TERM in
+        xterm )
+            XSERVER=$(who am i | awk '{print $NF}' | tr -d ')''(' )
+            # Ane-Pieter Wieringa suggests the following alternative:
+            #  I_AM=$(who am i)
+            #  SERVER=${I_AM#*(}
+            #  SERVER=${SERVER%*)}
+            XSERVER=${XSERVER%%:*}
+            ;;
+            aterm | rxvt)
+            # Find some code that works here. ...
+            ;;
+    esac
+}
+
+if [ -z "${DISPLAY:=""}" ]; then
+    get_xserver
+    if [[ -z ${XSERVER}  || ${XSERVER} == $(hostname) ||
+       ${XSERVER} == "unix" ]]; then
+          DISPLAY=":0.0"          # Display on local host.
+    else
+       DISPLAY=${XSERVER}:0.0     # Display on remote host.
+    fi
+fi
+
+export DISPLAY
+
+#-------------------------------------------------------------
+# Some settings
+#-------------------------------------------------------------
+
+# enable for debugging bash
+# set -o xtrace
+# set -o nounset
+
+# Exit bash after Ctrl-D pressed 10 times
+set -o ignoreeof
+# Report the status of terminated background jobs immediately
+set -o notify
+# Prevent overwriting existing files with the > operator
+set -o noclobber
+# Fail early when pipe'ing bash commands
+set -o pipefail
+
+#-------------------------------------------------------------
+# Some options
+#-------------------------------------------------------------
+
+# cd into the directory by typing only its name
+shopt -s autocd
+# Correct the typos in the cd command automatically
+# shopt -s cdspell
+# Check that a command exists before trying to execute it, otherwise perform a normal path search
+shopt -s checkhash
+# Do not exit shell if there are funning jobs
+shopt -s checkjobs
+# Check the window size after each command and, if necessary, update the values of LINES and COLUMNS
+shopt -s checkwinsize
+# Expand environment variable on TAB press
+shopt -s direxpand
+# Supercharge your globbing experience
+shopt -s globstar
+# Append to the history file, don't overwrite it
 shopt -s histappend
+# Re-edit a failed history substitution.
+shopt -s histreedit
+# Print a command from history before executing the command
+shopt -s histverify
 
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE="" # unlimited bash history
-HISTFILESIZE="" # unlimited bash history
+#-------------------------------------------------------------
+# History file
+#-------------------------------------------------------------
+
+# File to store history of commands called
+HISTFILE=$HOME/.bash_history
+# Don't put duplicate lines in the history.
+HISTCONTROL=ignoredups:ignorespace
+# Unlimited bash history
+HISTSIZE=""
+# Unlimited bash history
+HISTFILESIZE=""
+# History file format
 export HISTTIMEFORMAT='%F %T '
 
-# to correctly work with remote hosts
+#-------------------------------------------------------------
+# Languages
+#-------------------------------------------------------------
+
+# Use correctly work on remote hosts
 export LANG=en_US.UTF-8
 
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-shopt -s checkwinsize
+#-------------------------------------------------------------
+# PS1
+# You will most likely want to make use of either `__posh_git_ps1` or
+# `__posh_git_echo`. Refer to the documentation of the functions for additional
+# information.
+#
+#
+# CONFIG OPTIONS
+# ==============
+#
+# This script should work out of the box. Available options are set through
+# your git configuration files. This allows you to control the prompt display on a
+# per-repository basis.
+#
+### bash.branchBehindAndAheadDisplay
+#
+# This option controls whether and how to display the number of commits by which
+# the current branch is behind or ahead of its remote.
+#
+# 1   `full`: _Default_. Display count alongside the appropriate up/down arrow. If
+#     both behind and ahead, use two separate arrows.
+# 2   `compact`: Display count alongside the appropriate up/down arrow. If both
+#     behind and ahead, display the behind count, then a double arrow, then the
+#     ahead count.
+# 3   `minimal`: Display the up/down or double arrow as appropriate, with no
+#     counts.
+#
+# ### bash.describeStyle
+#
+# This option controls if you would like to see more information about the
+# identity of commits checked out as a detached `HEAD`. This is also controlled
+# by the legacy environment variable `GIT_PS1_DESCRIBESTYLE`.
+#
+#
+# 1  `contains`: relative to newer annotated tag `(v1.6.3.2~35)`
+# 2  `branch`: relative to newer tag or branch `(master~4)`
+# 3  `describe`: relative to older annotated tag `(v1.6.3.1-13-gdd42c2f)`
+# 4  `default`: exactly matching tag
+#
+# ### bash.enableFileStatus
+#
+# 1  `true`: _Default_. The script will query for all file indicators every time.
+# 2  `false`: No file indicators will be displayed. The script will not query
+#     upstream for differences. Branch color-coding information is still
+#     displayed.
+#
+# ### bash.enableGitStatus
+#
+# 1  `true`: _Default_. Color coding and indicators will be shown.
+# 2  `false`: The script will not run.
+#
+# ### bash.enableStashStatus
+#
+# 1  `true`: _Default_. An indicator will display if the stash is not empty.
+# 2  `false`: An indicator will not display the stash status.
+#
+# ### bash.showStatusWhenZero
+#
+# 1  `true`:   Indicators will be shown even if there are no updates to the index or
+#     working tree.
+# 2  `false`: _Default_. No file change indicators will be shown if there are no
+#    changes to the index or working tree.
+#
+# ### bash.showUpstream
+#
+# By default, `__posh_git_ps1` will compare `HEAD` to your `SVN` upstream if it can
+# find one, or `@{upstream}` otherwise. This is also controlled by the legacy
+# environment variable `GIT_PS1_SHOWUPSTREAM`.
+#
+# 1  `legacy`: Does not use the `--count` option available in recent versions of
+#    `git-rev-list`
+# 2  `git`: _Default_. Always compares `HEAD` to `@{upstream}`
+# 3  `svn`: Always compares `HEAD` to `SVN` upstream
+#
+# ### bash.enableStatusSymbol
+#
+# 1  `true`: _Default_. Status symbols (`≡` `↑` `↓` `↕`) will be shown.
+# 2  `false`: No status symbol will be shown, saving some prompt length.
+#
+###############################################################################
 
-# xterm-256 color control sequences
-SET_BG="\e[48;5;"
-SET_FG="\e[38;5;"
-END="m"
+__posh_color () {
+    if [ -n "$ZSH_VERSION" ]; then
+        echo %{$1%}
+    elif [ -n "$BASH_VERSION" ]; then
+        echo \\[$1\\]
+    else
+        # assume Bash anyway
+        echo \\[$1\\]
+    fi
+}
 
-# Nice xterm-256color colors
-PROMPT_COLOR=100
-BG_COLOR=0
-OUTPUT_COLOR=230
-TIME_COLOR=140
-GIT_COLOR=7
-USERHOST_COLOR=034
-CMD_COLOR=230
-SNOWMAN_COLOR=40
-SYSTEM_COLOR=124
+# Echoes the git status string.
+__posh_git_echo () {
+    if [ "$(git config --bool bash.enableGitStatus)" = 'false' ]; then
+        return;
+    fi
 
-# For better vim colors
-export TERM=xterm-256color
+    local Red='\033[0;31m'
+    local Green='\033[0;32m'
+    local BrightRed='\033[0;91m'
+    local BrightGreen='\033[0;92m'
+    local BrightYellow='\033[0;93m'
+    local BrightCyan='\033[0;96m'
 
-# \n - newline
-# \$ - variable
-# \[ \] surround characters not to be included in the length calculation
-# \` \` surround command to be executed
-export PS1="\[$SET_FG$TIME_COLOR$END\]\$LAST_LAUNCH_TIME\[$SET_FG$GIT_COLOR$END\][ \[$SET_FG$SYSTEM_COLOR$END\]$SYSTEM_TYPE\[$SET_FG$USERHOST_COLOR$END\]\u@\h:\[$SET_FG$PROMPT_COLOR$END\]\w \[$SET_FG$GIT_COLOR$END\](\$(git rev-parse --abbrev-ref HEAD 2>/dev/null)) ]$ "
+    local DefaultForegroundColor=$(__posh_color '\e[m') # Default no color
+    local DefaultBackgroundColor=
 
+    local BeforeText='['
+    local BeforeForegroundColor=$(__posh_color $BrightYellow) # Yellow
+    local BeforeBackgroundColor=
+    local DelimText=' |'
+    local DelimForegroundColor=$(__posh_color $BrightYellow) # Yellow
+    local DelimBackgroundColor=
+
+    local AfterText=']'
+    local AfterForegroundColor=$(__posh_color $BrightYellow) # Yellow
+    local AfterBackgroundColor=
+
+    local BranchForegroundColor=$(__posh_color $BrightCyan)  # Cyan
+    local BranchBackgroundColor=
+    local BranchAheadForegroundColor=$(__posh_color $BrightGreen) # Green
+    local BranchAheadBackgroundColor=
+    local BranchBehindForegroundColor=$(__posh_color $BrightRed) # Red
+    local BranchBehindBackgroundColor=
+    local BranchBehindAndAheadForegroundColor=$(__posh_color $BrightYellow) # Yellow
+    local BranchBehindAndAheadBackgroundColor=
+
+    local BeforeIndexText=''
+    local BeforeIndexForegroundColor=$(__posh_color $Green) # Dark green
+    local BeforeIndexBackgroundColor=
+
+    local IndexForegroundColor=$(__posh_color $Green) # Dark green
+    local IndexBackgroundColor=
+
+    local WorkingForegroundColor=$(__posh_color $Red) # Dark red
+    local WorkingBackgroundColor=
+
+    local StashForegroundColor=$(__posh_color $BrightRed) # Red
+    local StashBackgroundColor=
+    local BeforeStash='('
+    local AfterStash=')'
+
+    local LocalDefaultStatusSymbol=''
+    local LocalWorkingStatusSymbol=' !'
+    local LocalWorkingStatusColor=$(__posh_color "$Red")
+    local LocalStagedStatusSymbol=' ~'
+    local LocalStagedStatusColor=$(__posh_color "$BrightCyan")
+
+    local RebaseForegroundColor=$(__posh_color '\e[0m') # reset
+    local RebaseBackgroundColor=
+
+    local BranchBehindAndAheadDisplay=`git config --get bash.branchBehindAndAheadDisplay`
+    if [ -z "$BranchBehindAndAheadDisplay" ]; then
+        BranchBehindAndAheadDisplay="full"
+    fi
+
+    local EnableFileStatus=`git config --bool bash.enableFileStatus`
+    case "$EnableFileStatus" in
+        true)  EnableFileStatus=true ;;
+        false) EnableFileStatus=false ;;
+        *)     EnableFileStatus=true ;;
+    esac
+    local ShowStatusWhenZero=`git config --bool bash.showStatusWhenZero`
+    case "$ShowStatusWhenZero" in
+        true)  ShowStatusWhenZero=true ;;
+        false) ShowStatusWhenZero=false ;;
+        *)     ShowStatusWhenZero=false ;;
+    esac
+    local EnableStashStatus=`git config --bool bash.enableStashStatus`
+    case "$EnableStashStatus" in
+        true)  EnableStashStatus=true ;;
+        false) EnableStashStatus=false ;;
+        *)     EnableStashStatus=true ;;
+    esac
+    local EnableStatusSymbol=`git config --bool bash.enableStatusSymbol`
+    case "$EnableStatusSymbol" in
+        true)  EnableStatusSymbol=true ;;
+        false) EnableStatusSymbol=false ;;
+        *)     EnableStatusSymbol=true ;;
+    esac
+
+    local BranchIdenticalStatusSymbol=''
+    local BranchAheadStatusSymbol=''
+    local BranchBehindStatusSymbol=''
+    local BranchBehindAndAheadStatusSymbol=''
+    local BranchWarningStatusSymbol=''
+    if $EnableStatusSymbol; then
+      BranchIdenticalStatusSymbol=$' \xE2\x89\xA1' # Three horizontal lines
+      BranchAheadStatusSymbol=$' \xE2\x86\x91' # Up Arrow
+      BranchBehindStatusSymbol=$' \xE2\x86\x93' # Down Arrow
+      BranchBehindAndAheadStatusSymbol=$'\xE2\x86\x95' # Up and Down Arrow
+      BranchWarningStatusSymbol=' ?'
+    fi
+
+    # these globals are updated by __posh_git_ps1_upstream_divergence
+    __POSH_BRANCH_AHEAD_BY=0
+    __POSH_BRANCH_BEHIND_BY=0
+
+    local is_detached=false
+
+    local g=$(__posh_gitdir)
+    if [ -z "$g" ]; then
+        return # not a git directory
+    fi
+    local rebase=''
+    local b=''
+    local step=''
+    local total=''
+    if [ -d "$g/rebase-merge" ]; then
+        b=$(cat "$g/rebase-merge/head-name" 2>/dev/null)
+        step=$(cat "$g/rebase-merge/msgnum" 2>/dev/null)
+        total=$(cat "$g/rebase-merge/end" 2>/dev/null)
+        if [ -f "$g/rebase-merge/interactive" ]; then
+            rebase='|REBASE-i'
+        else
+            rebase='|REBASE-m'
+        fi
+    else
+        if [ -d "$g/rebase-apply" ]; then
+            step=$(cat "$g/rebase-apply/next")
+            total=$(cat "$g/rebase-apply/last")
+            if [ -f "$g/rebase-apply/rebasing" ]; then
+                rebase='|REBASE'
+            elif [ -f "$g/rebase-apply/applying" ]; then
+                rebase='|AM'
+            else
+                rebase='|AM/REBASE'
+            fi
+        elif [ -f "$g/MERGE_HEAD" ]; then
+            rebase='|MERGING'
+        elif [ -f "$g/CHERRY_PICK_HEAD" ]; then
+            rebase='|CHERRY-PICKING'
+        elif [ -f "$g/REVERT_HEAD" ]; then
+            rebase='|REVERTING'
+        elif [ -f "$g/BISECT_LOG" ]; then
+            rebase='|BISECTING'
+        fi
+
+        b=$(git symbolic-ref HEAD 2>/dev/null) || {
+            is_detached=true
+            local output=$(git config -z --get bash.describeStyle)
+            if [ -n "$output" ]; then
+                GIT_PS1_DESCRIBESTYLE=$output
+            fi
+            b=$(
+            case "${GIT_PS1_DESCRIBESTYLE-}" in
+            (contains)
+                git describe --contains HEAD ;;
+            (branch)
+                git describe --contains --all HEAD ;;
+            (describe)
+                git describe HEAD ;;
+            (* | default)
+                git describe --tags --exact-match HEAD ;;
+            esac 2>/dev/null) ||
+
+            b=$(cut -c1-7 "$g/HEAD" 2>/dev/null)... ||
+            b='unknown'
+            b="($b)"
+        }
+    fi
+
+    if [ -n "$step" ] && [ -n "$total" ]; then
+        rebase="$rebase $step/$total"
+    fi
+
+    local hasStash=false
+    local stashCount=0
+    local isBare=''
+
+    if [ 'true' = "$(git rev-parse --is-inside-git-dir 2>/dev/null)" ]; then
+        if [ 'true' = "$(git rev-parse --is-bare-repository 2>/dev/null)" ]; then
+            isBare='BARE:'
+        else
+            b='GIT_DIR!'
+        fi
+    elif [ 'true' = "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ]; then
+        if $EnableStashStatus; then
+            git rev-parse --verify refs/stash >/dev/null 2>&1 && hasStash=true
+            if $hasStash; then
+                stashCount=$(git stash list | wc -l | tr -d '[:space:]')
+            fi
+        fi
+        __posh_git_ps1_upstream_divergence
+        local divergence_return_code=$?
+    fi
+
+    # show index status and working directory status
+    if $EnableFileStatus; then
+        local indexAdded=0
+        local indexModified=0
+        local indexDeleted=0
+        local indexUnmerged=0
+        local filesAdded=0
+        local filesModified=0
+        local filesDeleted=0
+        local filesUnmerged=0
+        while IFS="\n" read -r tag rest
+        do
+            case "${tag:0:1}" in
+                A )
+                    (( indexAdded++ ))
+                    ;;
+                M )
+                    (( indexModified++ ))
+                    ;;
+                T )
+                    (( indexModified++ ))
+                    ;;
+                R )
+                    (( indexModified++ ))
+                    ;;
+                C )
+                    (( indexModified++ ))
+                    ;;
+                D )
+                    (( indexDeleted++ ))
+                    ;;
+                U )
+                    (( indexUnmerged++ ))
+                    ;;
+            esac
+            case "${tag:1:1}" in
+                \? )
+                    (( filesAdded++ ))
+                    ;;
+                A )
+                    (( filesAdded++ ))
+                    ;;
+                M )
+                    (( filesModified++ ))
+                    ;;
+                T )
+                    (( filesModified++ ))
+                    ;;
+                D )
+                    (( filesDeleted++ ))
+                    ;;
+                U )
+                    (( filesUnmerged++ ))
+                    ;;
+            esac
+        done <<< "`git status --porcelain 2>/dev/null`"
+    fi
+
+    local gitstring=
+    local branchstring="$isBare${b##refs/heads/}"
+
+    # before-branch text
+    gitstring="$BeforeBackgroundColor$BeforeForegroundColor$BeforeText"
+
+    # branch
+    if (( $__POSH_BRANCH_BEHIND_BY > 0 && $__POSH_BRANCH_AHEAD_BY > 0 )); then
+        gitstring+="$BranchBehindAndAheadBackgroundColor$BranchBehindAndAheadForegroundColor$branchstring"
+        if [ "$BranchBehindAndAheadDisplay" = "full" ]; then
+            gitstring+="$BranchBehindStatusSymbol$__POSH_BRANCH_BEHIND_BY$BranchAheadStatusSymbol$__POSH_BRANCH_AHEAD_BY"
+        elif [ "$BranchBehindAndAheadDisplay" = "compact" ]; then
+            gitstring+=" $__POSH_BRANCH_BEHIND_BY$BranchBehindAndAheadStatusSymbol$__POSH_BRANCH_AHEAD_BY"
+        else
+            gitstring+=" $BranchBehindAndAheadStatusSymbol"
+        fi
+    elif (( $__POSH_BRANCH_BEHIND_BY > 0 )); then
+        gitstring+="$BranchBehindBackgroundColor$BranchBehindForegroundColor$branchstring"
+        if [ "$BranchBehindAndAheadDisplay" = "full" -o "$BranchBehindAndAheadDisplay" = "compact" ]; then
+            gitstring+="$BranchBehindStatusSymbol$__POSH_BRANCH_BEHIND_BY"
+        else
+            gitstring+="$BranchBehindStatusSymbol"
+        fi
+    elif (( $__POSH_BRANCH_AHEAD_BY > 0 )); then
+        gitstring+="$BranchAheadBackgroundColor$BranchAheadForegroundColor$branchstring"
+        if [ "$BranchBehindAndAheadDisplay" = "full" -o "$BranchBehindAndAheadDisplay" = "compact" ]; then
+            gitstring+="$BranchAheadStatusSymbol$__POSH_BRANCH_AHEAD_BY"
+        else
+            gitstring+="$BranchAheadStatusSymbol"
+        fi
+    elif (( $divergence_return_code )); then
+        # ahead and behind are both 0, but there was some problem while executing the command.
+        gitstring+="$BranchBackgroundColor$BranchForegroundColor$branchstring$BranchWarningStatusSymbol"
+    else
+        # ahead and behind are both 0, and the divergence was determined successfully
+        gitstring+="$BranchBackgroundColor$BranchForegroundColor$branchstring$BranchIdenticalStatusSymbol"
+    fi
+
+    gitstring+="${rebase:+$RebaseForegroundColor$RebaseBackgroundColor$rebase}"
+
+    # index status
+    if $EnableFileStatus; then
+        local indexCount="$(( $indexAdded + $indexModified + $indexDeleted + $indexUnmerged ))"
+        local workingCount="$(( $filesAdded + $filesModified + $filesDeleted + $filesUnmerged ))"
+
+        if (( $indexCount != 0 )) || $ShowStatusWhenZero; then
+            gitstring+="$IndexBackgroundColor$IndexForegroundColor +$indexAdded ~$indexModified -$indexDeleted"
+        fi
+        if (( $indexUnmerged != 0 )); then
+            gitstring+=" $IndexBackgroundColor$IndexForegroundColor!$indexUnmerged"
+        fi
+        if (( $indexCount != 0 && ($workingCount != 0 || $ShowStatusWhenZero) )); then
+            gitstring+="$DelimBackgroundColor$DelimForegroundColor$DelimText"
+        fi
+        if (( $workingCount != 0 )) || $ShowStatusWhenZero; then
+            gitstring+="$WorkingBackgroundColor$WorkingForegroundColor +$filesAdded ~$filesModified -$filesDeleted"
+        fi
+        if (( $filesUnmerged != 0 )); then
+            gitstring+=" $WorkingBackgroundColor$WorkingForegroundColor!$filesUnmerged"
+        fi
+
+        local localStatusSymbol=$LocalDefaultStatusSymbol
+        local localStatusColor=$DefaultForegroundColor
+
+        if (( workingCount != 0 )); then
+            localStatusSymbol=$LocalWorkingStatusSymbol
+            localStatusColor=$LocalWorkingStatusColor
+        elif (( indexCount != 0 )); then
+            localStatusSymbol=$LocalStagedStatusSymbol
+            localStatusColor=$LocalStagedStatusColor
+        fi
+
+        gitstring+="$DefaultBackgroundColor$localStatusColor$localStatusSymbol$DefaultForegroundColor"
+
+        if $EnableStashStatus && $hasStash; then
+            gitstring+="$DefaultBackgroundColor$DefaultForegroundColor $StashBackgroundColor$StashForegroundColor$BeforeStash$stashCount$AfterStash"
+        fi
+    fi
+
+    # after-branch text
+    gitstring+="$AfterBackgroundColor$AfterForegroundColor$AfterText$DefaultBackgroundColor$DefaultForegroundColor"
+    echo "$gitstring"
+}
+
+# Returns the location of the .git/ directory.
+__posh_gitdir ()
+{
+    # Note: this function is duplicated in git-completion.bash
+    # When updating it, make sure you update the other one to match.
+    if [ -z "${1-}" ]; then
+        if [ -n "${__posh_git_dir-}" ]; then
+            echo "$__posh_git_dir"
+        elif [ -n "${GIT_DIR-}" ]; then
+            test -d "${GIT_DIR-}" || return 1
+            echo "$GIT_DIR"
+        elif [ -d .git ]; then
+            echo .git
+        else
+            git rev-parse --git-dir 2>/dev/null
+        fi
+    elif [ -d "$1/.git" ]; then
+        echo "$1/.git"
+    else
+        echo "$1"
+    fi
+}
+
+# Updates the global variables `__POSH_BRANCH_AHEAD_BY` and `__POSH_BRANCH_BEHIND_BY`.
+__posh_git_ps1_upstream_divergence ()
+{
+    local key value
+    local svn_remote svn_url_pattern
+    local upstream=git          # default
+    local legacy=''
+
+    svn_remote=()
+    # get some config options from git-config
+    local output="$(git config -z --get-regexp '^(svn-remote\..*\.url|bash\.showUpstream)$' 2>/dev/null | tr '\0\n' '\n ')"
+    while read -r key value; do
+        case "$key" in
+        bash.showUpstream)
+            GIT_PS1_SHOWUPSTREAM="$value"
+            if [ -z "${GIT_PS1_SHOWUPSTREAM}" ]; then
+                return
+            fi
+            ;;
+        svn-remote.*.url)
+            svn_remote[ $((${#svn_remote[@]} + 1)) ]="$value"
+            svn_url_pattern+="\\|$value"
+            upstream=svn+git # default upstream is SVN if available, else git
+            ;;
+        esac
+    done <<< "$output"
+
+    # parse configuration values
+    for option in ${GIT_PS1_SHOWUPSTREAM}; do
+        case "$option" in
+        git|svn) upstream="$option" ;;
+        legacy)  legacy=1  ;;
+        esac
+    done
+
+    # Find our upstream
+    case "$upstream" in
+    git)    upstream='@{upstream}' ;;
+    svn*)
+        # get the upstream from the "git-svn-id: ..." in a commit message
+        # (git-svn uses essentially the same procedure internally)
+        local svn_upstream=($(git log --first-parent -1 \
+                    --grep="^git-svn-id: \(${svn_url_pattern#??}\)" 2>/dev/null))
+        if (( 0 != ${#svn_upstream[@]} )); then
+            svn_upstream=${svn_upstream[ ${#svn_upstream[@]} - 2 ]}
+            svn_upstream=${svn_upstream%@*}
+            local n_stop="${#svn_remote[@]}"
+            local n
+            for ((n=1; n <= n_stop; n++)); do
+                svn_upstream=${svn_upstream#${svn_remote[$n]}}
+            done
+
+            if [ -z "$svn_upstream" ]; then
+                # default branch name for checkouts with no layout:
+                upstream=${GIT_SVN_ID:-git-svn}
+            else
+                upstream=${svn_upstream#/}
+            fi
+        elif [ 'svn+git' = "$upstream" ]; then
+            upstream='@{upstream}'
+        fi
+        ;;
+    esac
+
+    local return_code=
+    __POSH_BRANCH_AHEAD_BY=0
+    __POSH_BRANCH_BEHIND_BY=0
+    # Find how many commits we are ahead/behind our upstream
+    if [ -z "$legacy" ]; then
+        local output=
+        output=$(git rev-list --count --left-right $upstream...HEAD 2>/dev/null)
+        return_code=$?
+        IFS=$' \t\n' read -r __POSH_BRANCH_BEHIND_BY __POSH_BRANCH_AHEAD_BY <<< $output
+    else
+        local output
+        output=$(git rev-list --left-right $upstream...HEAD 2>/dev/null)
+        return_code=$?
+        # produce equivalent output to --count for older versions of git
+        while IFS=$' \t\n' read -r commit; do
+            case "$commit" in
+            "<*") (( __POSH_BRANCH_BEHIND_BY++ )) ;;
+            ">*") (( __POSH_BRANCH_AHEAD_BY++ ))  ;;
+            esac
+        done <<< $output
+    fi
+    : ${__POSH_BRANCH_AHEAD_BY:=0}
+    : ${__POSH_BRANCH_BEHIND_BY:=0}
+    return $return_code
+}
+
+
+function __now {
+    date +%s%N
+}
+
+function __prompt_command_start {
+    __prompt_command_start=${__prompt_command_start:-$(__now)}
+}
+
+function __prompt_command_stop {
+    # shellcheck disable=SC2004
+    local delta_us=$((($(__now) - $__prompt_command_start) / 1000))
+    local us=$((delta_us % 1000))
+    local ms=$(((delta_us / 1000) % 1000))
+    local s=$(((delta_us / 1000000) % 60))
+    local m=$(((delta_us / 60000000) % 60))
+    local h=$((delta_us / 3600000000))
+    # Goal: always show around 3 digits of accuracy
+    if ((h > 0)); then timer_show=${h}h${m}m
+    elif ((m > 0)); then timer_show=${m}m${s}s
+    elif ((s >= 10)); then timer_show=${s}.$((ms / 100))s
+    elif ((s > 0)); then timer_show=${s}.$(printf %03d $ms)s
+    elif ((ms >= 100)); then timer_show=${ms}ms
+    elif ((ms > 0)); then timer_show=${ms}.$((us / 100))ms
+    else timer_show=${us}us
+    fi
+    unset __prompt_command_start
+}
+
+
+function __prompt_command {
+    LastCommand=$? # Must come first!
+    Blue='\[\e[01;34m\]'
+    White='\[\e[01;37m\]'
+    Red='\[\e[01;31m\]'
+    Green='\[\e[01;32m\]'
+    Reset='\[\e[00m\]'
+    FancyX='\342\234\227'
+    Checkmark='\342\234\223'
+    Newline='\n'
+
+    # Add a bright white exit status for the last command
+    PS1="$White\$? "
+    # If it was successful, print a green check mark. Otherwise, print
+    # a red X.
+    if [[ $LastCommand == 0 ]]; then
+        PS1+="$Green$Checkmark "
+    else
+        PS1+="$Red$FancyX "
+    fi
+
+    # Add the ellapsed time and current date
+    __prompt_command_stop
+    PS1+="($timer_show) \t "
+
+    # If root, just print the host in red. Otherwise, print the current user
+    # and host in green.
+    if [[ $EUID == 0 ]]; then
+        PS1+="$Red\\u$Green@\\h "
+    else
+        PS1+="$Green\\u@\\h "
+    fi
+    # Print the working directory and prompt marker in blue, and reset
+    # the text color to the default.
+    local gitstring=$(__posh_git_echo)
+    PS1+="$Blue\\w $gitstring$Newline\\\$$Reset "
+}
+
+trap '__prompt_command_start' DEBUG
+PROMPT_COMMAND='__prompt_command'
+
+#-------------------------------------------------------------
+# Sound
+#-------------------------------------------------------------
+
+# Turn off annoying terminal sound
+bind 'set bell-style none'
+
+#-------------------------------------------------------------
+# Tools
+#-------------------------------------------------------------
+
+#-------------------------------------------------------------
+# less
+#-------------------------------------------------------------
 
 # make less more friendly for non-text input files, see lesspipe(1)
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
+if [ -x /usr/bin/lesspipe ]; then
+    eval "$(SHELL=/bin/sh lesspipe)"
 fi
+
+#-------------------------------------------------------------
+# gcc
+#-------------------------------------------------------------
+
+# colored GCC warnings and errors
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+#-------------------------------------------------------------
+# ls
+#-------------------------------------------------------------
+
+export LSCOLORS=Gxfxcxdxbxegedabagacad
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    if [ -r ~/.dircolors ]; then
+        eval "$(dircolors -b ~/.dircolors)"
+    else
+        eval "$(dircolors -b)"
+    fi
     alias ls='ls --color=auto'
-    #alias dir='dir --color=auto'
-    #alias vdir='vdir --color=auto'
-
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 fi
 
-# colored GCC warnings and errors
-export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
-# some more ls aliases
+# some more ls aliase
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
-
-export LSCOLORS=Gxfxcxdxbxegedabagacad
-
-# Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
-
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
-fi
-
-set show-all-if-ambiguous on
-
-# Setup `on_prompt` handler to output execution time for each command run
-export PROMPT_COMMAND='on_prompt'
-
-LAST_LAUNCH_TIME=
-
-function on_prompt() {
-    # Do not trigger on completion
-    [ -n "$COMP_LINE" ] && return
-    # Save last launch time frame
-    if [ -n "$LAST_LAUNCH_TIME" -a "$LAST_LAUNCH_TIME" != "$(date +'%T')" ]; then
-        local newline=$'\n'
-        local cur_time=$(date +'%s')
-        local secs=$(($cur_time - $LAST_LAUNCH_UNIXTIME))
-        sec="$(($secs % 60)) sec"
-        local mins=$(($secs / 60))
-        if [ $mins -gt 0 ]; then
-            min="$(($mins % 60)) min "
-        else
-            min=""
-        fi
-        local hours=$(($mins / 60))
-        if [ $hours -gt 0 ]; then
-            hr="$hours h "
-        else
-            hr=""
-        fi
-        LAST_LAUNCH_TIME="[$LAST_LAUNCH_TIME - $(date +'%T') ($hr$min$sec)]$newline"
-    else
-        LAST_LAUNCH_TIME=""
-    fi
-    # For time tracking, we need to catch the first DEBUG trap
-    __interactive__=yes
-    history -a # flush history into .bash_history
-}
-
-function before_command_execution() {
-    if [ -n "$__interactive__" ]; then
-        LAST_LAUNCH_TIME=$(date +'%T')
-        LAST_LAUNCH_UNIXTIME=$(date +'%s')
-        __interactive__=
-    fi
-}
-
-# Set `before_command_execution` as handler for DEBUG bash signal
-trap 'before_command_execution' DEBUG
-
-# Turn off annoying terminal sound
-bind 'set bell-style none'
