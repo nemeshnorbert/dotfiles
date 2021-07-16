@@ -109,11 +109,15 @@ filetype plugin indent on
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 if filereadable(expand('$HOME/.vim/bundle/vim-colorschemes/README.md'))
     " Default dark scheme
-    colorscheme Tomorrow-Night  " sets the colorscheme
-    set background=dark
+    colorscheme Tomorrow-Night
+    " colorscheme gruvbox
+    " colorscheme nordisk
+
 
     " Default light scheme
     " colorscheme PaperColor " sets the colorscheme
+
+    set background=dark
     " set background=light
 endif
 
