@@ -110,7 +110,7 @@ export DISPLAY
 # set -o nounset
 
 # Exit bash after Ctrl-D pressed 10 times
-set -o ignoreeof
+# set -o ignoreeof
 # Report the status of terminated background jobs immediately
 set -o notify
 # Prevent overwriting existing files with the > operator
